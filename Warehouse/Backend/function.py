@@ -6,7 +6,10 @@ from datetime import datetime, timedelta, timezone
 
 import jwt #json web token. When someone logs in with a valid username and password, your application generates a token.
            #That token is sent with requests to protected endpoints.
-           
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError          
+
+ph = PasswordHasher()
 
 # Database connection
 DB_PATH = "warehouse.db" 
@@ -14,9 +17,9 @@ engine = create_engine(f"sqlite:///{DB_PATH}")
 
 
 USERNAME="Monica"
-PASSWORD="123"
+PASSWORD="333"
 
-ACCESS_TOKEN_EXPIRY= 1 #mins
+ACCESS_TOKEN_EXPIRY= 15 #mins
 REFRESH_TOKEN_EXPIRY = 7 * 24 *60 #mins
 SECRET_KEY ="SECRET123"
 ALGORITHM = "HS256"
@@ -48,6 +51,13 @@ class Package(Base):
     arrival_date = Column(String)
     status = Column(String, default="Pending")
     dispatch_batch_id = Column(Integer, ForeignKey("dispatch_batches.id"))
+    
+class User(Base):
+    __tablename__ = "Users"
+    user_id = Column[int](Integer, primary_key = True)
+    user_name = Column[str](String)
+    password = Column[str](String)
+    
 
 
 # Create database tables
@@ -366,11 +376,25 @@ def add_dispatch_batch(batch_name, destination, vehicle_number,dispatch_date, pa
 
 
 def verify_login(username , password):
-    if username == USERNAME and password == PASSWORD:
-        access_token = create_token(username, token_type="access")
-        refresh_token = create_token(username, token_type="refresh")
-        return {"access_token": access_token, "refresh_token": refresh_token}
-    return None
+    session = Session(engine)
+    user = session.query(User).filter_by(user_name = username).first()
+    if user is None:
+        session.close()
+        return False
+    try:
+        ph.verify(user.password, password)
+    except VerifyMismatchError :
+        session.close()
+        return False  
+    session.close()
+    access_token = create_token(username=username, token_type="access")
+    refresh_token = create_token(username=username, token_type="refresh")
+    return {"access_token": access_token, "refresh_token": refresh_token}  
+        
+    
+       
+    
+    
 
 
 def create_token(username, token_type): 
@@ -396,4 +420,15 @@ def verify_token(token, token_type):
     return False
     
    
+    #----users---
+def register_user(user_name:str, password:str):
+    session = Session(engine)
+    user_exists = session.query(User).filter_by(user_name=user_name).first()
+    if user_exists is not None:
+        session.close()
+        return False
+    session.add(User(user_name=user_name,password=ph.hash(password)))
+    session.commit()
+    session.close()
+    return True
     
