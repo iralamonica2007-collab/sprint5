@@ -9,8 +9,7 @@ import jwt #json web token. When someone logs in with a valid username and passw
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError          
 
-ph = PasswordHasher()
-
+ph = PasswordHasher() #creates an object that provides password hashing and verification functionality.
 # Database connection
 DB_PATH = "warehouse.db" 
 engine = create_engine(f"sqlite:///{DB_PATH}")
@@ -54,19 +53,23 @@ class Package(Base):
     
 class User(Base):
     __tablename__ = "Users"
-    user_id = Column[int](Integer, primary_key = True)
-    user_name = Column[str](String)
-    password = Column[str](String)
+    user_id = Column(Integer, primary_key = True)
+    user_name = Column(String)
+    password = Column(String)
+    role = Column(String, default="staff")  #If a new User record is created without specifying a role, it gets staff by default.
     
 
 
 # Create database tables
 Base.metadata.create_all(engine)
 
+
+# Endpoint 1: POST /packages
+# Purpose: Add a new package
+
 def add_package(package_name, destination, weight, arrival_date):
 
     session = Session(engine)
-
     package = Package(
         package_name=package_name,
         destination=destination,
@@ -87,7 +90,6 @@ def add_package(package_name, destination, weight, arrival_date):
     }
 
     session.close()
-
     return response
 
 
@@ -138,14 +140,13 @@ def update_package(package_id, package_name=None, destination=None, weight=None,
 
     if arrival_date is not None:
         package.arrival_date = arrival_date
-        
+
     if status is not None:
+        if status not in ["Pending", "Assigned", "Dispatched"]:
+            session.close()
+            return "invalid_status"
 
-       if status not in ["Pending", "Assigned", "Dispatched"]:
-        session.close()
-        return "invalid_status"
-
-    package.status = status   
+        package.status = status
 
     session.commit()
 
@@ -167,7 +168,6 @@ def update_package(package_id, package_name=None, destination=None, weight=None,
 def delete_package(package_id):
 
     session = Session(engine)
-
     package = session.get(Package, package_id)
 
     if package is None:
@@ -393,9 +393,6 @@ def verify_login(username , password):
         
     
        
-    
-    
-
 
 def create_token(username, token_type): 
     time = ACCESS_TOKEN_EXPIRY
@@ -421,14 +418,47 @@ def verify_token(token, token_type):
     
    
     #----users---
-def register_user(user_name:str, password:str):
+def register_user(user_name: str, password: str, role: str):
+
     session = Session(engine)
+
     user_exists = session.query(User).filter_by(user_name=user_name).first()
+
     if user_exists is not None:
         session.close()
         return False
-    session.add(User(user_name=user_name,password=ph.hash(password)))
+
+    new_user = User(
+        user_name=user_name,
+        password=ph.hash(password),
+        rrole=role.strip().lower()
+    )
+
+    session.add(new_user)
     session.commit()
     session.close()
+
     return True
+#
     
+
+# GET USER ROLE
+# Used  to check whether a user is admin or staff.
+
+def get_user_role(username):
+
+    session = Session(engine)
+
+    user = session.query(User).filter_by(user_name=username).first()
+
+    if user is None:
+        session.close()
+        return None
+
+    role = user.role
+    session.close()
+
+    if role is not None:
+        return role.strip().lower()
+
+    return None
