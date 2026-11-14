@@ -1,0 +1,518 @@
+/* ==========================================================
+   Canteen Pre-Order — warm "Indian canteen" theme
+   Only this file is styled; the JSX is unchanged.
+   ========================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --bg: #fff8ef;
+  --surface: #ffffff;
+  --ink: #2b1d14;
+  --ink-soft: #7a6a5d;
+  --line: #f0e2d3;
+  --saffron: #f59f00;
+  --chilli: #e8590c;
+  --turmeric: #ffd43b;
+  --curry: #2f9e44;
+  --danger: #e03131;
+  --radius: 18px;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow: 0 2px 6px rgba(120, 60, 0, 0.06), 0 10px 30px rgba(120, 60, 0, 0.06);
+  --shadow-hover: 0 8px 18px rgba(232, 89, 12, 0.14), 0 26px 60px rgba(232, 89, 12, 0.16);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  padding: 32px clamp(16px, 4vw, 56px) 96px;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--turmeric); color: var(--ink); }
+
+/* Warm scrollbar */
+html { scrollbar-color: var(--saffron) #fbeee0; }
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: #fbeee0; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--saffron), var(--chilli));
+  border-radius: 999px;
+  border: 3px solid #fbeee0;
+}
+
+/* ---------- Floating colour blobs in the background ---------- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20vmax;
+  z-index: -1;
+  background:
+    radial-gradient(35vmax 35vmax at 15% 20%, rgba(255, 212, 59, 0.35), transparent 60%),
+    radial-gradient(30vmax 30vmax at 85% 10%, rgba(232, 89, 12, 0.18), transparent 60%),
+    radial-gradient(40vmax 40vmax at 70% 85%, rgba(47, 158, 68, 0.12), transparent 60%);
+  animation: drift 22s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to   { transform: translate3d(-4vmax, 3vmax, 0) rotate(8deg); }
+}
+
+/* ---------- Scroll progress bar across the top ---------- */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  z-index: 10;
+  background: linear-gradient(90deg, var(--turmeric), var(--saffron), var(--chilli));
+  box-shadow: 0 0 12px rgba(232, 89, 12, 0.5);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: progress linear both;
+  animation-timeline: scroll(root);
+}
+
+@keyframes progress {
+  to { transform: scaleX(1); }
+}
+
+/* ---------- Headings ---------- */
+h1, h2 {
+  font-family: "Poppins", "Inter", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  margin: 48px 0 24px;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  position: relative;
+  width: fit-content;   /* own line, but the underline only as wide as the text */
+}
+
+/* Animated underline under every section heading */
+h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 4px;
+  width: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--saffron), var(--chilli));
+  transform-origin: left;
+  animation: underline 0.9s 0.2s var(--smooth) both;
+}
+
+@keyframes underline {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Icons in front of the three section headings */
+#root > h1:nth-of-type(2)::before,
+section h1::before {
+  display: inline-block;
+  margin-right: 10px;
+  animation: wobble 3s ease-in-out infinite;
+}
+#root > h1:nth-of-type(2)::before { content: "🍽️"; }
+section:nth-of-type(1) h1::before { content: "🧾"; }
+section:nth-of-type(2) h1::before { content: "👨‍🍳"; }
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-10deg) scale(1.08); }
+}
+
+/* The big page title (the first heading on the page) */
+#root > h1:first-child {
+  margin-top: 0;
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.05;
+  background: linear-gradient(100deg, var(--chilli), var(--saffron), var(--turmeric), var(--saffron), var(--chilli));
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite, drop-in 0.8s var(--smooth) both;
+}
+
+#root > h1:first-child::after { display: none; }
+
+@keyframes shimmer {
+  to { background-position: -250% 0; }
+}
+
+@keyframes drop-in {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin: 32px 0 14px;
+}
+
+/* ---------- Sections (My orders, Kitchen) as soft glass panels ---------- */
+section {
+  margin-top: 56px;
+  padding: clamp(18px, 3vw, 32px);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(240, 226, 211, 0.9);
+  border-radius: 28px;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow);
+}
+
+section h1 { margin-top: 0; }
+
+/* Today's sales (the line right under the Kitchen heading) as a big stat badge */
+section h1 + p {
+  display: inline-block;
+  margin: 0 0 22px;
+  padding: 14px 22px;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--curry), #37b24d);
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(47, 158, 68, 0.3);
+  animation: pop 0.6s var(--spring) both;
+}
+
+section h1 + p::before { content: "💰 "; }
+
+/* Friendly empty states: "No orders today." / "No orders in the queue." */
+section > p:not(h1 + p) {
+  margin: 8px 0 0;
+  padding: 26px;
+  text-align: center;
+  color: var(--ink-soft);
+  border: 2px dashed #efcfa9;
+  border-radius: var(--radius);
+  background: rgba(255, 248, 239, 0.7);
+}
+
+section > p:not(h1 + p)::before {
+  content: "🍃";
+  display: block;
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+  animation: wobble 3s ease-in-out infinite;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- Inputs, dropdown, buttons ---------- */
+input,
+select {
+  font: inherit;
+  padding: 12px 18px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  margin: 0 8px 10px 0;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(120, 60, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.25s, transform 0.25s var(--spring);
+}
+
+input::placeholder { color: #b9a796; }
+
+input:hover,
+select:hover { border-color: #f3c99a; }
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--saffron);
+  box-shadow: 0 0 0 5px rgba(245, 159, 0, 0.18);
+  transform: translateY(-2px);
+}
+
+select { cursor: pointer; }
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+button {
+  position: relative;
+  overflow: hidden;
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, var(--saffron), var(--chilli));
+  box-shadow: 0 6px 16px rgba(232, 89, 12, 0.25);
+  margin-bottom: 10px;
+  transition: transform 0.25s var(--spring), box-shadow 0.25s, filter 0.2s;
+}
+
+/* Shine that sweeps across a button on hover */
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.7s;
+}
+
+button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 26px rgba(232, 89, 12, 0.35);
+  filter: saturate(1.15);
+}
+
+button:hover::after { left: 130%; }
+
+button:active { transform: translateY(0) scale(0.96); }
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- The grid of cards ---------- */
+.products {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 22px;
+}
+
+/* ---------- One card ---------- */
+.product {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow);
+  transition: transform 0.45s var(--spring), box-shadow 0.35s, border-color 0.35s;
+}
+
+/* Coloured top edge that grows on hover */
+.product::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(90deg, var(--turmeric), var(--saffron), var(--chilli));
+  transform: scaleX(0.15);
+  transform-origin: left;
+  transition: transform 0.5s var(--smooth);
+}
+
+.product:hover {
+  transform: translateY(-8px) rotate(-0.5deg);
+  box-shadow: var(--shadow-hover);
+  border-color: #f6d3ae;
+}
+
+.product:hover::before { transform: scaleX(1); }
+
+.product h2 {
+  font-size: 1.15rem;
+  margin: 4px 0 0;
+}
+
+.product p { margin: 0; color: var(--ink-soft); }
+
+/* First line under the title (category / quantity / roll number) as a small chip */
+.product p:first-of-type {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--chilli);
+  background: #fff1e3;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+
+/* Second line (price / total / quantity) bigger and bolder */
+li.product p:nth-of-type(2) {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.product button {
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+/* Second button in a card = Cancel → red outline, a "careful" action */
+.product button + button {
+  margin-top: 8px;
+  color: var(--danger);
+  background: #fff;
+  box-shadow: inset 0 0 0 2px #f5b5b5;
+}
+
+.product button + button:hover {
+  color: #fff;
+  background: var(--danger);
+  box-shadow: 0 10px 22px rgba(224, 49, 49, 0.3);
+}
+
+/* Sold-out menu card: it ends with a "Sold out" line instead of a button */
+li.product:has(> p:last-child) {
+  filter: grayscale(0.85);
+  opacity: 0.72;
+}
+
+li.product > p:last-child {
+  margin-top: auto;
+  align-self: flex-start;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--danger);
+  border: 2px solid var(--danger);
+  border-radius: 8px;
+  padding: 4px 10px;
+  transform: rotate(-6deg);
+}
+
+/* The Details box in My orders */
+div.product {
+  margin-top: 26px;
+  max-width: 420px;
+  border: 2px solid var(--saffron);
+  box-shadow: 0 16px 40px rgba(245, 159, 0, 0.22);
+  animation: slide-in 0.5s var(--spring) both;
+}
+
+div.product::before { transform: scaleX(1); }
+
+div.product p { color: var(--ink); }
+div.product p:first-of-type { color: var(--chilli); }
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Scroll animation: cards rise in as you scroll to them ---------- */
+@supports (animation-timeline: view()) {
+  li.product,
+  section {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+
+  /* Wave: cards further along a row start a little later */
+  li.product:nth-child(3n + 2) { animation-range: entry 6% cover 28%; }
+  li.product:nth-child(3n + 3) { animation-range: entry 12% cover 34%; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(56px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Coloured status pills ---------- */
+.status {
+  align-self: flex-start;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 5px 12px 5px 24px;
+  border-radius: 999px;
+  position: relative;
+}
+
+.status::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+li.product .status.placed    { color: #1c7ed6; background: #e7f1fc; }
+li.product .status.preparing { color: #e8590c; background: #fff0e4; }
+li.product .status.ready     { color: #2f9e44; background: #e6f6ea; }
+li.product .status.collected { color: #868e96; background: #f1f3f5; }
+li.product .status.cancelled { color: #e03131; background: #fdeaea; }
+
+/* Pulsing dot while the kitchen is cooking */
+.status.preparing::before { animation: pulse 1.2s ease-in-out infinite; }
+.status.ready::before { animation: pulse 2s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+  50%      { box-shadow: 0 0 0 6px transparent; opacity: 0.6; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 600px) {
+  input,
+  select,
+  button { width: 100%; margin-right: 0; }
+
+  .products { grid-template-columns: 1fr; }
+
+  section { border-radius: 22px; }
+}
+
+/* ---------- Respect "reduce motion" on the user's device ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  body::before { display: none; }
+}
